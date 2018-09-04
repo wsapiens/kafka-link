@@ -60,10 +60,10 @@ public class LinkConsumer implements Runnable {
                             SubContracts subContracts = gson.fromJson(record.value(), SubContracts.class);
 
                             // import filtering
-                            LinkClient client = new ImportNewContractClientAdapter("dfappsup1.texturallc.net", "3128");
-                            client.setAuth("admin_s300ws", "wert9999");
-                            client.setBaseUrl("https://usint1.texturacorp.com/ebis");
-                            client.setRequestContextPath("/api/v1/import/insert-contracts");
+                            LinkClient client = new ImportNewContractClientAdapter("proxyHost", "proxyPort");
+                            client.setAuth("username", "password");
+                            client.setBaseUrl("targetHostUrl");
+                            client.setRequestContextPath("/endpoint/context");
                             client.setPayloadObject(subContracts);
                             LinkJob texturaJob = client.sendRequest();
                             log.info(texturaJob.getUri());

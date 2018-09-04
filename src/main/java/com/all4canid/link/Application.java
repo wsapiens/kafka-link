@@ -15,12 +15,12 @@ public class Application {
 	private static final Logger log = LoggerFactory.getLogger(Application.class);
 
 	public static void main(String[] args) throws Exception {
-		log.info("Start TexturaLink2 Application");
+		log.info("Start KafkaLink Application");
 
-		String groupId = "textura-link2-consumer";
+		String groupId = "kafka-link-consumer";
 		String bootStrapServer = "localhost:9092";
-		List<String> inputTopics = Arrays.asList("tlink-streams-import");
-		List<String> outputTopics = Arrays.asList("tlink-streams-export");
+		List<String> inputTopics = Arrays.asList("klink-streams-import");
+		List<String> outputTopics = Arrays.asList("klink-streams-export");
 		int numberOfConsumers = 3;
 		int numberOfProducers = 1;
 		ExecutorService consumerExecutor = Executors.newFixedThreadPool(numberOfConsumers);
@@ -28,31 +28,31 @@ public class Application {
 
 		final List<LinkConsumer> consumers = new ArrayList<>();
 		for(int i=0; i < numberOfConsumers; i++) {
-		    LinkConsumer consumer = new LinkConsumer(bootStrapServer, groupId, inputTopics);
-		    consumers.add(consumer);
-		    consumerExecutor.submit(consumer);
+			LinkConsumer consumer = new LinkConsumer(bootStrapServer, groupId, inputTopics);
+			consumers.add(consumer);
+			consumerExecutor.submit(consumer);
 		}
 		final List<LinkProducer> producers = new ArrayList<>();
 		outputTopics.forEach(topic -> {
-		    LinkProducer producer = new LinkProducer(bootStrapServer, topic);
-            producers.add(producer);
-            producerExecutor.submit(producer);
+			LinkProducer producer = new LinkProducer(bootStrapServer, topic);
+			producers.add(producer);
+			producerExecutor.submit(producer);
 		});
 
 		// attach shutdown handler to catch control-c
-		Runtime.getRuntime().addShutdownHook(new Thread("textura-link2-shutdown-hook") {
+		Runtime.getRuntime().addShutdownHook(new Thread("kafka-link-shutdown-hook") {
 			@Override
 			public void run() {
-			    consumers.forEach(LinkConsumer::shutdown);
-			    consumerExecutor.shutdown();
-			    producerExecutor.shutdown();
-			    try {
-			        consumerExecutor.awaitTermination(5000, TimeUnit.MILLISECONDS);
-			        producerExecutor.awaitTermination(5000, TimeUnit.MILLISECONDS);
-			    } catch (InterruptedException e) {
-			        log.warn(e.getMessage());
-			        Thread.currentThread().interrupt();
-			    }
+				consumers.forEach(LinkConsumer::shutdown);
+				consumerExecutor.shutdown();
+				producerExecutor.shutdown();
+				try {
+					consumerExecutor.awaitTermination(5000, TimeUnit.MILLISECONDS);
+					producerExecutor.awaitTermination(5000, TimeUnit.MILLISECONDS);
+				} catch (InterruptedException e) {
+					log.warn(e.getMessage());
+					Thread.currentThread().interrupt();
+				}
 			}
 		});
 	}
